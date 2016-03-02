@@ -9,6 +9,10 @@ import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.Set;
 import java.util.StringTokenizer;
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 /*
  * To change this license header, choose License Headers in Project Properties.
@@ -53,7 +57,7 @@ public class ParseSrt {
                         subHash.put(timeStr, subs);
                     }
                 }
-                System.out.println(subHash.keySet());
+                System.out.println(subHash);
             } catch (IOException e) {
                 e.printStackTrace();
             } finally {
@@ -64,16 +68,59 @@ public class ParseSrt {
                 }
             }
     }
-     public void getStr(String time){
-         String str = "";
-//         System.out.println(subHash);
+    public String getStr(String time) {
+        String str = "", mainStr = "";
+        try {
+        SimpleDateFormat format = new SimpleDateFormat("HH:mm:ss");
+        
+//        System.out.println(time);
+        StringTokenizer st = new StringTokenizer(time,"/");
+        String timeStr= "";
+        while(st.hasMoreTokens()){
+            timeStr += st.nextToken();
+            break;
+        }
+        System.out.println("--->"+timeStr);
+        java.util.Date date_timeCrnt =(java.util.Date)format.parse(timeStr);
+
+        java.sql.Time timeCrnt = new java.sql.Time(date_timeCrnt.getTime());
+        System.out.println("its time parse"+timeCrnt);
         Set<String> keys = subHash.keySet();
-//         System.out.println(subHash.keySet());
         Iterator<String> itr = keys.iterator();
+        
+        
         while (itr.hasNext()) { 
            str = itr.next();
-            System.out.println("keys--> :" +str);
+//            System.out.println("before parse"+str);
+            java.sql.Time time1 = null;
+            java.sql.Time time2 = null;
+            StringTokenizer st1 = new StringTokenizer(str,", ");
+            while(st1.hasMoreTokens()){
+               String timeStr1 = st1.nextToken();
+//                System.out.println(timeStr1);
+               java.util.Date date_time1 =(java.util.Date)format.parse(timeStr1);
+               time1 = new java.sql.Time(date_time1.getTime());
+               
+               String timeStr2 = st1.nextToken();
+//               System.out.println(timeStr2);
+               java.util.Date date_time2 =(java.util.Date)format.parse(timeStr2);
+               time2 = new java.sql.Time(date_time2.getTime());
+//                       System.out.println(t);
+           }
+//            System.out.println(time1+ "---"+time2);
+               if (time1.compareTo(timeCrnt) <= 0 && timeCrnt.compareTo(time2) < 0) {
+//                   System.out.println(time1+ "---"+time2);
+                   mainStr += subHash.get(str);
+                   break;
+               }
+           
         }
+         System.out.println(mainStr);
+        
+        } catch(Exception e) {
+            
+        }
+        return mainStr;
      }
             
     
