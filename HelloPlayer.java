@@ -31,6 +31,7 @@ package helloworld;
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import java.awt.Font;
 import java.io.File;
 import javafx.application.Application;
 import javafx.application.Platform;
@@ -54,6 +55,8 @@ import javafx.scene.media.Media;
 import javafx.scene.media.MediaPlayer;
 import javafx.scene.media.MediaPlayer.Status;
 import javafx.scene.media.MediaView;
+import javafx.scene.paint.Color;
+import javafx.scene.text.TextAlignment;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 
@@ -68,22 +71,25 @@ class MediaControl extends BorderPane {
   private Label playTime;
   private Slider volumeSlider;
   private HBox mediaBar;
+  private Label subs = new Label();
   public ParseSrt ps = new ParseSrt();
+  private Pane mvPane;
   public MediaControl(final MediaPlayer mp) {
     ps.extractSrt();
     this.mp = mp;
     setStyle("-fx-background-color: #bfc2c7;");
     mediaView = new MediaView(mp);
-    Pane mvPane = new Pane() {
+    
+    mvPane = new Pane() {
     };
     mvPane.getChildren().add(mediaView);
+    mvPane.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
     mvPane.setStyle("-fx-background-color: black;");
     setCenter(mvPane);
     mediaBar = new HBox();
     mediaBar.setAlignment(Pos.CENTER);
     mediaBar.setPadding(new Insets(5, 10, 5, 10));
     BorderPane.setAlignment(mediaBar, Pos.CENTER);
-
     final Button playButton = new Button(">");
 
     playButton.setOnAction(new EventHandler<ActionEvent>() {
@@ -121,6 +127,12 @@ class MediaControl extends BorderPane {
           stopRequested = false;
         } else {
           playButton.setText("||");
+          subs.setText("");
+          try{
+            mvPane.getChildren().add(subs);
+          } catch(Exception e){
+              
+          }
         }
       }
     });
@@ -129,8 +141,15 @@ class MediaControl extends BorderPane {
       public void run() {
         System.out.println("onPaused");
         playButton.setText(">");
-        System.out.println(playTime.getText());
-        ps.getStr(playTime.getText().toString());
+//        System.out.println(playTime.getText());
+        try{
+            subs.setText(ps.getStr(playTime.getText().toString()));
+            subs.setTextFill(Color.web("#ffffff"));
+            subs.setTextAlignment(TextAlignment.CENTER);
+            mvPane.getChildren().add(subs);
+        } catch(Exception e){
+            
+        }
       }
     });
 
@@ -265,7 +284,7 @@ class MediaControl extends BorderPane {
  * 
  * @author cmcastil
  */
-public class HelloPlayer extends Application {
+public class HelloWorld extends Application {
 
   private static final String MEDIA_URL = "http://download.oracle.com/otndocs/products/javafx/oow2010-2.flv";
   private static String arg1;
@@ -282,7 +301,8 @@ public class HelloPlayer extends Application {
   public void start(Stage primaryStage) {
     primaryStage.setTitle("Embedded Media Player");
     Group root = new Group();
-    Scene scene = new Scene(root, 540, 241);
+//    Scene scene = new Scene(root, 540, 241);
+    final Scene scene = new Scene(root, 960, 540);
 
     // create media player
     
@@ -296,6 +316,7 @@ public class HelloPlayer extends Application {
     scene.setRoot(mediaControl);
 
     primaryStage.setScene(scene);
+    primaryStage.fullScreenProperty();
     primaryStage.show();
   }
 }
